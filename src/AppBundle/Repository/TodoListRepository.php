@@ -21,8 +21,8 @@ class TodoListRepository extends EntityRepository
     public function getAvailableLists()
     {
         return $this->createQueryBuilder('tl')
-            ->select('t, tl')
-            ->join('tl.tasks', 't')
+            ->select('tl, t')
+            ->leftJoin('tl.tasks', 't')
             ->getQuery()
             ->getResult();
     }
@@ -36,8 +36,8 @@ class TodoListRepository extends EntityRepository
     public function getList($id)
     {
         return $this->createQueryBuilder('tl')
-            ->select('t, tl')
-            ->join('tl.tasks', 't')
+            ->select('tl, t')
+            ->leftJoin('tl.tasks', 't')
             ->where('tl.id = :id')->setParameter('id', $id)
             ->getQuery()
             ->getSingleResult();
