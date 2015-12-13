@@ -41,25 +41,34 @@ class TodoService
     }
 
     /**
-     * @return TodoList[]
+     * @return array
      */
     public function getLists()
     {
-        return $this->todoListRepository->getAvailableLists();
+        $lists = $this->todoListRepository->getAvailableLists();
+
+        return array_map(
+            function (TodoList $list) {
+                return $this->formatList($list);
+            },
+            $lists
+        );
     }
 
     /**
      * @param int $listId
-     * @return TodoList
+     * @return array
      */
     public function getList($listId)
     {
-        return $this->todoListRepository->getList($listId);
+        $list = $this->todoListRepository->getList($listId);
+
+        return $this->formatList($list);
     }
 
     /**
      * @param string $text
-     * @return TodoList
+     * @return array
      */
     public function createList($text)
     {
@@ -69,32 +78,41 @@ class TodoService
         $this->objectManager->persist($todoList);
         $this->objectManager->flush();
 
-        return $todoList;
+        return $this->formatList($todoList);
     }
 
     /**
      * @param int $listId
-     * @return Task[]
+     * @return array
      */
     public function getTasks($listId)
     {
-        return $this->taskRepository->getListTasks($listId);
+        $tasks = $this->taskRepository->getListTasks($listId);
+
+        return array_map(
+            function (Task $task) {
+                return $this->formatTask($task);
+            },
+            $tasks
+        );
     }
 
     /**
      * @param int $listId
      * @param int $taskId
-     * @return Task
+     * @return array
      */
     public function getTask($listId, $taskId)
     {
-        return $this->taskRepository->getTask($taskId, $listId);
+        $task = $this->taskRepository->getTask($taskId, $listId);
+
+        return $this->formatTask($task);
     }
 
     /**
      * @param int $listId
      * @param string $text
-     * @return Task
+     * @return array
      */
     public function addTask($listId, $text)
     {
@@ -110,14 +128,14 @@ class TodoService
         $this->objectManager->persist($todoList);
         $this->objectManager->flush();
 
-        return $task;
+        return $this->formatTask($task);
     }
 
     /**
      * @param int $listId
      * @param int $taskId
      * @param string $text
-     * @return Task
+     * @return array
      */
     public function updateTask($listId, $taskId, $text)
     {
@@ -127,7 +145,7 @@ class TodoService
         $this->objectManager->persist($task);
         $this->objectManager->flush();
 
-        return $task;
+        return $this->formatTask($task);
     }
 
     /**
@@ -145,7 +163,7 @@ class TodoService
     /**
      * @param int $listId
      * @param int $taskId
-     * @return Task
+     * @return array
      */
     public function resolveTask($listId, $taskId)
     {
@@ -155,6 +173,39 @@ class TodoService
         $this->objectManager->persist($task);
         $this->objectManager->flush();
 
-        return $task;
+        return $this->formatTask($task);
+    }
+
+    /**
+     * @param TodoList $list
+     * @return array
+     */
+    private function formatList(TodoList $list)
+    {
+        return [
+            'id' => $list->getId(),
+            'name' => $list->getName(),
+            'tasks' => $list->getTasks()->map(
+                function (Task $task) {
+                    return $task->getId();
+                }
+            )->toArray(),
+            'total_tasks' => $list->getTasks()->count()
+        ];
+    }
+
+    /**
+     * @param Task $task
+     * @return array
+     */
+    private function formatTask(Task $task)
+    {
+        return [
+            'id' => $task->getId(),
+            'text' => $task->getText(),
+            'status' => $task->getStatus() === Task::STATUS_DONE ? 'Done' : 'Undone',
+            'created_at' => $task->getCreatedAt(),
+            'list' => $task->getTodoList()->getId()
+        ];
     }
 }

@@ -24,14 +24,7 @@ class TodosController extends Controller
     {
         $lists = $this->getTodoService()->getLists();
 
-        $data = array_map(
-            function (TodoList $list) {
-                return $this->formatList($list);
-            },
-            $lists
-        );
-
-        return new JsonResponse($data);
+        return new JsonResponse($lists);
     }
 
     /**
@@ -46,7 +39,7 @@ class TodosController extends Controller
 
         $list = $this->getTodoService()->getList($listId);
 
-        return new JsonResponse($this->formatList($list));
+        return new JsonResponse($list);
     }
 
     /**
@@ -61,7 +54,7 @@ class TodosController extends Controller
 
         $list = $this->getTodoService()->createList($text);
 
-        return new JsonResponse($this->formatList($list));
+        return new JsonResponse($list);
     }
 
     /**
@@ -76,14 +69,7 @@ class TodosController extends Controller
 
         $tasks = $this->getTodoService()->getTasks($listId);
 
-        $data = array_map(
-            function (Task $task) {
-                return $this->formatTask($task);
-            },
-            $tasks
-        );
-
-        return new JsonResponse($data);
+        return new JsonResponse($tasks);
     }
 
 
@@ -100,7 +86,7 @@ class TodosController extends Controller
 
         $task = $this->getTodoService()->getTask($listId, $id);
 
-        return new JsonResponse($this->formatTask($task));
+        return new JsonResponse($task);
     }
 
 
@@ -117,7 +103,7 @@ class TodosController extends Controller
 
         $task = $this->getTodoService()->addTask($listId, $text);
 
-        return new JsonResponse($this->formatTask($task));
+        return new JsonResponse($task);
     }
 
     /**
@@ -134,7 +120,7 @@ class TodosController extends Controller
 
         $task = $this->getTodoService()->updateTask($listId, $taskId, $text);
 
-        return new JsonResponse($this->formatTask($task));
+        return new JsonResponse($task);
     }
 
     /**
@@ -166,39 +152,7 @@ class TodosController extends Controller
 
         $task = $this->getTodoService()->resolveTask($listId, $taskId);
 
-        return new JsonResponse($this->formatTask($task));
-    }
-
-    /**
-     * @param TodoList $list
-     * @return array
-     */
-    private function formatList(TodoList $list)
-    {
-        return [
-            'id' => $list->getId(),
-            'name' => $list->getName(),
-            'tasks' => $list->getTasks()->map(
-                function (Task $task) {
-                    return $task->getId();
-                }
-            )->toArray()
-        ];
-    }
-
-    /**
-     * @param Task $task
-     * @return array
-     */
-    private function formatTask(Task $task)
-    {
-        return [
-            'id' => $task->getId(),
-            'text' => $task->getText(),
-            'status' => $task->getStatus() === Task::STATUS_DONE ? 'Done' : 'Undone',
-            'created_at' => $task->getCreatedAt(),
-            'list' => $task->getTodoList()->getId()
-        ];
+        return new JsonResponse($task);
     }
 
     /**

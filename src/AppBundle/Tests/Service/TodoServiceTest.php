@@ -6,6 +6,7 @@ use AppBundle\Entity\TodoList;
 use AppBundle\Repository\TaskRepository;
 use AppBundle\Repository\TodoListRepository;
 use AppBundle\Service\TodoService;
+use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Persistence\ObjectManager;
 use PHPUnit_Framework_MockObject_MockObject;
 
@@ -44,7 +45,7 @@ class TodoServiceTest extends \PHPUnit_Framework_TestCase
     {
         $this->todoListRepository->expects($this->once())
             ->method('getAvailableLists')
-            ->willReturn([1, 2]);
+            ->willReturn([new TodoList(), new TodoList()]);
 
         $list = $this->todoService->getLists();
         $this->assertCount(2, $list);
@@ -61,7 +62,7 @@ class TodoServiceTest extends \PHPUnit_Framework_TestCase
             ->willReturn($list);
 
         $result = $this->todoService->getList($listId);
-        $this->assertEquals($list, $result);
+        $this->assertNotEmpty($result);
     }
 
     public function testCreateList()
@@ -69,7 +70,7 @@ class TodoServiceTest extends \PHPUnit_Framework_TestCase
         $this->em->expects($this->once())->method('flush');
 
         $todoList = $this->todoService->createList("test");
-        $this->assertEquals("test", $todoList->getName());
+        $this->assertEquals("test", $todoList['name']);
     }
 
     public function testGetTasks()
@@ -78,7 +79,7 @@ class TodoServiceTest extends \PHPUnit_Framework_TestCase
         $this->taskRepository->expects($this->once())
             ->method('getListTasks')
             ->with($listId)
-            ->willReturn([new Task()]);
+            ->willReturn([$this->getTask()]);
 
         $list = $this->todoService->getTasks($listId);
         $this->assertCount(1, $list);
@@ -88,7 +89,7 @@ class TodoServiceTest extends \PHPUnit_Framework_TestCase
     {
         $taskId = 1;
         $listId = 2;
-        $task = new Task();
+        $task = $this->getTask();
 
         $this->taskRepository->expects($this->once())
             ->method('getTask')
@@ -96,7 +97,7 @@ class TodoServiceTest extends \PHPUnit_Framework_TestCase
             ->willReturn($task);
 
         $result = $this->todoService->getTask($listId, $taskId);
-        $this->assertEquals($task, $result);
+        $this->assertEquals("test", $result['text']);
     }
 
 
@@ -114,14 +115,14 @@ class TodoServiceTest extends \PHPUnit_Framework_TestCase
         $this->em->expects($this->once())->method('flush');
 
         $task = $this->todoService->addTask($listId, "test");
-        $this->assertEquals("test", $task->getText());
+        $this->assertEquals("test", $task['text']);
     }
 
     public function testUpdateTask()
     {
         $listId = 1;
         $taskId = 1;
-        $task = new Task();
+        $task = $this->getTask();
 
         $this->taskRepository->expects($this->once())
             ->method('getTask')
@@ -131,14 +132,14 @@ class TodoServiceTest extends \PHPUnit_Framework_TestCase
         $this->em->expects($this->once())->method('persist')->with($task);
         $this->em->expects($this->once())->method('flush');
         $task = $this->todoService->updateTask($listId, $taskId, "test updated");
-        $this->assertEquals("test updated", $task->getText());
+        $this->assertEquals("test updated", $task['text']);
     }
 
     public function testRemoveTask()
     {
         $listId = 1;
         $taskId = 1;
-        $task = new Task();
+        $task = $this->getTask();
 
         $this->taskRepository->expects($this->once())
             ->method('getTask')
@@ -155,7 +156,7 @@ class TodoServiceTest extends \PHPUnit_Framework_TestCase
     {
         $listId = 1;
         $taskId = 1;
-        $task = new Task();
+        $task = $this->getTask();
 
         $this->taskRepository->expects($this->once())
             ->method('getTask')
@@ -164,6 +165,22 @@ class TodoServiceTest extends \PHPUnit_Framework_TestCase
 
         $this->em->expects($this->once())->method('flush');
         $task = $this->todoService->resolveTask($listId, $taskId);
-        $this->assertEquals(Task::STATUS_DONE, $task->getStatus());
+        $this->assertEquals('Done', $task['status']);
+    }
+
+    private function getTask()
+    {
+        $list = new TodoList();
+        $list->setId(1);
+        $list->setName("test list");
+
+        $task = new Task();
+        $task->setId(2);
+        $task->setText("test");
+
+        $list->addTask($task);
+        $task->setTodoList($list);
+
+        return $task;
     }
 }

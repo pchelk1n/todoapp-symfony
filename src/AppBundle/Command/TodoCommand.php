@@ -29,7 +29,7 @@ class TodoCommand extends ContainerAwareCommand
         $table = new Table($output);
         $table->setHeaders(['id', 'name', 'total']);
         foreach ($lists as $list) {
-            $table->addRow([$list->getId(), $list->getName(), $list->getTasks()->count()]);
+            $table->addRow([$list['id'], $list['name'], $list['total_tasks']]);
         }
         $table->render();
     }
