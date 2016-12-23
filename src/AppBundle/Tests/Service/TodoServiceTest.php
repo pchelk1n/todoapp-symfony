@@ -14,36 +14,28 @@ class TodoServiceTest extends \PHPUnit_Framework_TestCase
     /**
      * @var ObjectManager|PHPUnit_Framework_MockObject_MockObject
      */
-    protected $em;
+    private $em;
 
     /**
      * @var TaskRepository|PHPUnit_Framework_MockObject_MockObject
      */
-    protected $taskRepository;
+    private $taskRepository;
 
     /**
      * @var TodoListRepository|PHPUnit_Framework_MockObject_MockObject
      */
-    protected $todoListRepository;
+    private $todoListRepository;
 
     /**
      * @var TodoService
      */
-    protected $todoService;
+    private $todoService;
 
     protected function setUp()
     {
-        $this->em = $this->getMockBuilder(ObjectManager::class)
-            ->disableOriginalConstructor()
-            ->getMock();
-
-        $this->taskRepository = $this->getMockBuilder(TaskRepository::class)
-            ->disableOriginalConstructor()
-            ->getMock();
-
-        $this->todoListRepository = $this->getMockBuilder(TodoListRepository::class)
-            ->disableOriginalConstructor()
-            ->getMock();
+        $this->em = $this->createMock(ObjectManager::class);
+        $this->taskRepository = $this->createMock(TaskRepository::class);
+        $this->todoListRepository = $this->createMock(TodoListRepository::class);
 
         $this->todoService = new TodoService($this->em, $this->taskRepository, $this->todoListRepository);
     }
