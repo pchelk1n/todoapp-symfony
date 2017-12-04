@@ -1,0 +1,16 @@
+services:
+    _defaults:
+        autowire: true
+        autoconfigure: true
+        public: false
+
+    App\:
+        resource: '../src/{Service,Command,Controller}'
+
+    App\Repository\TaskRepository:
+        factory: ['@Doctrine\ORM\EntityManagerInterface', getRepository]
+        arguments: [App\Entity\Task]
+
+    App\Repository\TodoListRepository:
+        factory: ['@Doctrine\ORM\EntityManagerInterface', getRepository]
+        arguments: [App\Entity\TodoList]

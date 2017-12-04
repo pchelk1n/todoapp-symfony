@@ -1,7 +1,0 @@
-services:
-    app.service.todo:
-        class: AppBundle\Service\TodoService
-        arguments:
-            - @doctrine.orm.entity_manager
-            - @app.repository.task
-            - @app.repository.todo_list
